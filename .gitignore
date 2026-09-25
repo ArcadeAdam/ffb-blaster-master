@@ -1,0 +1,15 @@
+src-tauri/target/
+src-tauri/gen/
+ffbblaster-master.settings.json
+ffbblaster-master.presets.json
+*.bak
+*.tmp
+*.log
+.env
+.env.*
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+Desktop.ini

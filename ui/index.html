@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FFB Blaster MASTER</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="startupOverlay" class="startup-overlay" role="status" aria-live="polite">
+    <div class="startup-card">
+      <div class="startup-name">FFB BLASTER MASTER</div>
+      <div id="startupStage" class="startup-stage">Preparing the interface…</div>
+      <div id="startupProgress" class="startup-track" role="progressbar" aria-label="Application startup" aria-valuemin="0" aria-valuemax="100" aria-valuenow="5">
+        <span id="startupBar" class="startup-bar" style="width: 5%"></span>
+      </div>
+      <div class="startup-note">Large arcade folders can take a moment to scan.</div>
+    </div>
+  </div>
+
+  <header class="marquee">
+    <div class="marquee-head">
+      <h1 class="marquee-title">FFB BLASTER MASTER</h1>
+      <div class="profile-actions">
+        <button id="ffbBtn" class="btn cyan ffb-button">Enable/Disable FFB Blaster in TeknoParrot</button>
+        <button id="launchBtn" class="btn magenta" title="Launch a game to test saved settings, or enter gameplay briefly to generate FFBBlaster.ini on first launch">Test launch game</button>
+        <button id="donateBtn" class="btn small support" type="button" aria-label="Donate or buy me a coffee through PayPal; opens in your default browser" title="Optional $9.99 support via PayPal — opens in your browser">Donate / Buy me a coffee</button>
+      </div>
+    </div>
+
+    <div class="globals">
+      <div class="folder-settings">
+        <label class="field wide">
+          <span class="field-label">
+            <span>TeknoParrot game folders</span>
+            <strong id="gamePathState" class="path-state unset">NONE</strong>
+          </span>
+          <div class="row game-path-row">
+            <textarea id="gamePaths" rows="4" spellcheck="false" aria-describedby="gamePathsNote" placeholder="R:\Arcade\Teknoparrot&#10;C:\FNF&#10;C:\SuperCars"></textarea>
+            <div class="path-actions">
+              <button id="gameBrowseBtn" class="btn" type="button">Add folder</button>
+              <button id="scanBtn" class="btn cyan" type="button">Scan</button>
+            </div>
+          </div>
+          <small id="gamePathsNote" class="field-note">One folder per line. The first folder is your main game library and is searched recursively. Every additional line is one exact standalone game folder, such as C:\FNF. Whole-drive roots such as C:\ are not accepted.</small>
+        </label>
+
+        <label class="field wide">
+          <span class="field-label">
+            <span>TeknoParrot emulator folder</span>
+            <strong id="tpPathState" class="path-state unset">NOT SET</strong>
+          </span>
+          <div class="row">
+            <input id="tpPath" type="text" spellcheck="false" placeholder="R:\Arcade\Emulators\TeknoParrot">
+            <button id="tpBrowseBtn" class="btn">Browse</button>
+          </div>
+        </label>
+
+        <div id="legacyAlert" class="legacy-alert" hidden>
+          <span id="legacyAlertText"></span>
+          <button id="legacyReviewBtn" class="btn small danger">Review old plugin files</button>
+        </div>
+      </div>
+
+      <label class="field wide">
+        <span>Force feedback device GUID</span>
+        <div class="row">
+          <select id="deviceSelect">
+            <option value="">Looking for devices…</option>
+          </select>
+          <button id="refreshDevicesBtn" class="btn">Refresh</button>
+        </div>
+        <div class="row gap-top">
+          <input id="globalGuid" type="text" spellcheck="false" placeholder="0300c3096e3400000400000000000000">
+          <button id="applyGuidBtn" class="btn magenta">Set on every game</button>
+        </div>
+        <span id="deviceNote" class="device-note"></span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <aside class="rail">
+      <div class="rail-head">
+        <input id="gameSearch" type="search" placeholder="Filter games">
+        <div class="rail-meta">
+          <span id="gameCount">No games loaded</span>
+          <button id="checkAllBtn" class="link">Check all</button>
+          <button id="checkNoneBtn" class="link">Clear</button>
+        </div>
+      </div>
+      <ul id="gameList" class="game-list"></ul>
+    </aside>
+
+    <section class="editor">
+      <div class="editor-head">
+        <h2 id="currentGame">Pick a game</h2>
+        <p id="currentPath" class="path"></p>
+      </div>
+
+      <div class="preset-bar">
+        <select id="presetSelect"><option value="">Presets</option></select>
+        <button id="presetApplyBtn" class="btn small">Load into form</button>
+        <button id="presetSaveBtn" class="btn small">Save current as preset</button>
+        <button id="presetDeleteBtn" class="btn small danger">Delete</button>
+      </div>
+
+      <div id="fields" class="fields">
+        <p class="empty">Add your main game library and any standalone game folders above, hit Scan, then choose a game from the list.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="actionbar">
+    <span id="status" class="status">Ready</span>
+    <label class="chk"><input id="backupChk" type="checkbox" checked=""> Back up before saving</label>
+    <button id="revertBtn" class="btn small">Revert</button>
+    <button id="copyAllBtn" class="btn">Copy supported settings to checked games</button>
+    <button id="applyCheckedBtn" class="btn cyan">Apply changes to checked games</button>
+    <button id="saveBtn" class="btn magenta">Save this game</button>
+  </footer>
+
+  <dialog id="confirmDlg" class="confirm">
+    <h3 id="confirmTitle">Confirm changes</h3>
+    <p id="confirmSummary" class="confirm-summary"></p>
+    <div id="confirmDiff" class="diff"></div>
+    <div class="confirm-actions">
+      <button id="confirmCancel" class="btn small">Cancel</button>
+      <button id="confirmOk" class="btn small magenta">Write files</button>
+    </div>
+  </dialog>
+
+  <dialog id="ffbDlg" class="confirm">
+    <h3>Enable FFB Blaster in TeknoParrot</h3>
+    <p class="confirm-summary">
+      This switch tells TeknoParrot to use FFB Blaster. It does not create the
+      game’s settings file immediately.
+    </p>
+    <p class="next-step"><strong>NEXT STEP:</strong> After enabling a game, launch it through
+      TeknoParrot and continue until actual gameplay begins. The Press Start screen may be too
+      early. Then exit, return here, and Scan for its new <code>FFBBlaster.ini</code>.</p>
+    <p class="warn-line">Close TeknoParrotUi first — it can overwrite these files when it exits.</p>
+    <div id="ffbList" class="diff"></div>
+    <p id="ffbCount" class="ffb-count"></p>
+    <div class="confirm-actions">
+      <button id="ffbAll" class="btn small">Select all off</button>
+      <button id="ffbNone" class="btn small">Clear</button>
+      <button id="ffbCancel" class="btn small">Close</button>
+      <button id="ffbApply" class="btn small magenta">Enable checked</button>
+    </div>
+  </dialog>
+
+  <dialog id="legacyDlg" class="confirm legacy-dialog">
+    <h3>Old FFB Arcade Plugin detected</h3>
+    <p class="confirm-summary">
+      These older per-game plugin files can intercept the game before FFB Blaster.
+      Only folders containing an old <code>FFBPlugin.ini</code> plus package evidence
+      are shown. Generic wrapper DLLs are included only when their embedded identity
+      says <strong>FFB Arcade Plugin</strong>.
+    </p>
+    <p class="next-step"><strong>RECOVERABLE REMOVAL:</strong> Selected packages will be moved into
+      a timestamped backup folder inside each game folder. Nothing is permanently deleted.</p>
+    <p class="warn-line">Close the game and TeknoParrotUI before removing these files.</p>
+    <div id="legacyList" class="diff"></div>
+    <p id="legacyCount" class="ffb-count"></p>
+    <div class="confirm-actions">
+      <button id="legacyNoneBtn" class="btn small">Clear</button>
+      <button id="legacyCancelBtn" class="btn small">Close</button>
+      <button id="legacyRemoveBtn" class="btn small danger">Remove selected safely</button>
+    </div>
+  </dialog>
+
+  <dialog id="launchSetupDlg" class="confirm" aria-labelledby="launchSetupTitle" aria-describedby="launchSetupMessage">
+    <h3 id="launchSetupTitle">Set up game launching</h3>
+    <p id="launchSetupMessage" class="confirm-summary"></p>
+    <div class="confirm-actions">
+      <button id="launchSetupOkBtn" class="btn small cyan" type="button" autofocus>OK</button>
+    </div>
+  </dialog>
+
+  <dialog id="launchDlg" class="confirm launch-dialog">
+    <h3>Test launch a game</h3>
+    <p class="confirm-summary">
+      Choose any FFB-enabled TeknoParrot profile. Save configuration changes
+      before launching when testing an existing INI.
+    </p>
+    <p class="next-step"><strong>INI READY:</strong> Launch to test the saved FFB settings.<br>
+      Games with an INI appear dimmed and remain available to launch.<br>
+      <strong>FIRST LAUNCH:</strong> Enter gameplay briefly to generate
+      <code>FFBBlaster.ini</code>. The app watches automatically and adds the game when
+      the file appears. Exit the game before editing its settings.</p>
+    <label class="field">
+      <span>FFB-enabled game</span>
+      <select id="launchProfileSelect" class="launch-picker"></select>
+    </label>
+    <p id="launchProfilePath" class="launch-path"></p>
+    <p id="launchCount" class="ffb-count"></p>
+    <div class="confirm-actions">
+      <button id="launchCancelBtn" class="btn small">Close</button>
+      <button id="launchGoBtn" class="btn small magenta" title="Launch a game to test saved settings, or enter gameplay briefly to generate FFBBlaster.ini on first launch">Launch selected game</button>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+
+
+</body></html>
