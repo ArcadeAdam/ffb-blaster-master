@@ -13,6 +13,10 @@ library. It can:
 - find connected wheel/gamepad devices and create an SDL-style GUID;
 - save reusable presets.
 
+![FFB Blaster MASTER Beta 16 with a sample arcade library](docs/screenshots/beta-16-main.jpg)
+
+*Beta 16 with sample games. No wheel was connected to the capture PC.*
+
 There is no installer. The EXE, settings, and presets can all live together in a
 tools folder or on a USB drive.
 
